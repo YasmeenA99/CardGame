@@ -1,0 +1,158 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using System.Linq;
+
+public class SelectCards : MonoBehaviour
+{
+    public GameObject[] cards;
+    public string[] cardSuits;
+   // public int cardCount = 0;
+    public List<int> cardsPicked;
+    public List<int> correctCards;
+    public Text instructions;
+    public GameObject panel;
+    public bool animEnded;
+    public bool gameStarted;
+    public bool pickingStarted;
+    public float countDown = 10;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        //instructions.text = "Pick any card by pressing the matching number key. Press Any Key to Start.";
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if(!gameStarted && Input.anyKeyDown)
+        {
+            gameStarted = true;
+            panel.SetActive(false);
+            foreach (GameObject g in cards)
+            {
+                g.GetComponent<Animator>().SetBool("TurnCard", false);
+            }
+        }
+
+        if (gameStarted && !pickingStarted)
+        {
+            for(int i = 0; i < cards.Length; i++)
+            {
+                
+                instructions.text = Mathf.Round(countDown).ToString();
+                
+                    pickingStarted = true;
+                    for(int j = 0; j < cards.Length; j++)
+                    {
+                        instructions.text = "";
+                        //cards[j].GetComponent<Animator>().SetBool("TurnCard", false);
+                    }
+                
+            }
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            if (Input.GetKeyDown("" + i))
+            {
+                int selection = i - 1;
+                cardPicked(selection);
+
+            }
+        }
+        if (cardsPicked.Count == 2 && animEnded)
+        {
+            if (cardsPicked.Contains(3))
+            {
+                hideAllCards();
+            }
+            else
+            {
+                compareCards();
+            }
+        }
+
+        if(correctCards.Count == 8)
+        {
+            gameOver();
+        }
+
+        
+
+        animEnded = false;
+
+        
+    }
+
+    public void cardPicked(int selection)
+    {
+        
+            if (!correctCards.Contains(selection))
+            {
+                cards[selection].GetComponent<Animator>().SetBool("TurnCard", true);
+                cardsPicked.Add(selection);
+              
+              
+            }
+            
+        
+        
+    }
+
+    public void compareCards()
+    {
+        
+        
+
+        if (cardSuits[cardsPicked[0]] == cardSuits[cardsPicked[1]])
+        {
+            for (int j = 0; j < cardsPicked.Count; j++)
+            {
+                correctCards.Add(cardsPicked[j]);
+
+            }
+        }
+        else
+        {
+            for(int i = 0; i < cardsPicked.Count; i++)
+            {
+                hideCard(i);
+            }
+            
+        }
+        cardsPicked.Clear();
+    }
+
+    public void animationEnded()
+    {
+        animEnded = true;
+    }
+
+    public void hideCard(int selection)
+    {
+        cards[cardsPicked[selection]].GetComponent<Animator>().SetBool("TurnCard", false);
+    }
+
+    public void hideAllCards()
+    {
+        for( int i = 0; i < cards.Length; i++)
+        {
+            cards[i].GetComponent<Animator>().SetBool("TurnCard", false);
+            cardsPicked.Clear();
+            correctCards.Clear();
+        }
+    }
+
+    public void gameOver()
+    {
+        panel.SetActive(true);
+        instructions.text = "Well Done, Press Any Key to Try Again";
+        correctCards.Clear();
+        gameStarted = false;
+        pickingStarted = false;
+        countDown = 10;
+    }
+}
